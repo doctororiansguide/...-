@@ -1,52 +1,25 @@
-name: Deploy to InfinityFree via FTP
+name: Deploy to InfinityFree
 
 on:
   push:
     branches:
-      - main          # ← change to your branch if different (e.g. master)
-  workflow_dispatch:    # ← allows manual trigger from GitHub UI
+      - main  # This triggers the upload whenever you push to the 'main' branch
 
 jobs:
-  deploy:
-    name: Deploy
+  web-deploy:
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Get latest code
-        uses: actions/checkout@v4
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
 
-      # Optional: If your project needs building (e.g. React, Vue, Next.js, etc.)
-      # Uncomment and adjust as needed
-      # - name: 🔧 Setup Node.js
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: '20'
-      #
-      # - name: 📦 Install dependencies
-      #   run: npm install
-      #
-      # - name: 🛠 Build project
-      #   run: npm run build
-      #
-      # Then change local-dir below to: ./dist/ or ./build/ or wherever your built files end up
-
-      - name: 🔄 Sync files to InfinityFree via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server:       ${{ secrets.FTP_SERVER }}       # ← this was missing/wrong name before
-          username:     ${{ secrets.FTP_USERNAME }}
-          password:     ${{ secrets.FTP_PASSWORD }}
-          port:         21                              # default for plain FTP
-          protocol:     ftp                             # use 'ftps' if your host supports explicit FTPS
-          local-dir:    ./                              # ← folder to upload FROM (current repo root)
-                                                        #   change to ./dist/ or ./public/ if you build first
-          server-dir:   /htdocs/                        # ← common InfinityFree remote path
-                                                        #   or /public_html/ — check your control panel
-          exclude:      |
-            **/.git*
-            **/.github/**
-            **/node_modules/**
-            **/.env
-            **/README.md
-            **/*.log
-          log-level:    standard                        # or verbose for more debug info
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftpupload.net
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: 21
+        # InfinityFree usually requires files to be in the htdocs folder
+        server-dir: ./htdocs/ 
+        
