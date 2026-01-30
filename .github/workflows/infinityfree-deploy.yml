@@ -1,0 +1,49 @@
+name: Deploy to InfinityFree
+
+on:
+  push:
+    branches: [ main ]          # ← Change to 'master' if your default branch is master instead of main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      # ───────────────────────────────────────────────
+      # Uncomment the sections below ONLY if your project needs them:
+      #   - Composer for PHP dependencies (Laravel, etc.)
+      #   - npm/yarn for frontend build (React, Vue, etc.)
+      # ───────────────────────────────────────────────
+
+      # Optional: Install Composer dependencies (PHP projects)
+      # - name: Setup PHP
+      #   uses: shivammathur/setup-php@v2
+      #   with:
+      #     php-version: '8.2'          # Change to 8.1 / 8.3 etc. if needed
+      # - name: Install Composer deps
+      #   run: composer install --no-dev --optimize-autoloader --prefer-dist
+
+      # Optional: Build frontend (if you have package.json)
+      # - name: Install npm dependencies
+      #   run: npm ci
+      # - name: Build project
+      #   run: npm run build             # or yarn build, etc.
+
+      - name: 📂 Sync files to InfinityFree via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server:     ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USERNAME }}
+          password:   ${{ secrets.FTP_PASSWORD }}
+          server-dir: /htdocs/                  # Must end with /  ← this is your website root on InfinityFree
+          protocol:   ftp                       # Plain FTP (InfinityFree usually works best with this)
+          port:       21
+          # local-dir: ./dist/                  # ← Uncomment & change ONLY if deploying built files (e.g. from React/Vue build folder)
+          # exclude: |                          # ← Optional: skip these patterns
+          #   **/.git*
+          #   **/node_modules/**
+          #   **/.env
+          #   **/vendor/phpunit/**
+          # dangerous-clean-slate: true         # ← Uncomment ONLY for FIRST deploy to wipe remote folder (DANGEROUS – deletes everything!)
