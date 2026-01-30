@@ -1,49 +1,52 @@
-name: Deploy to InfinityFree
+name: Deploy to InfinityFree via FTP
 
 on:
   push:
-    branches: [ main ]          # ← Change to 'master' if your default branch is master instead of main
+    branches:
+      - main          # ← change to your branch if different (e.g. master)
+  workflow_dispatch:    # ← allows manual trigger from GitHub UI
 
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
+
     steps:
-      - name: 🚚 Get latest code
+      - name: 📥 Get latest code
         uses: actions/checkout@v4
 
-      # ───────────────────────────────────────────────
-      # Uncomment the sections below ONLY if your project needs them:
-      #   - Composer for PHP dependencies (Laravel, etc.)
-      #   - npm/yarn for frontend build (React, Vue, etc.)
-      # ───────────────────────────────────────────────
-
-      # Optional: Install Composer dependencies (PHP projects)
-      # - name: Setup PHP
-      #   uses: shivammathur/setup-php@v2
+      # Optional: If your project needs building (e.g. React, Vue, Next.js, etc.)
+      # Uncomment and adjust as needed
+      # - name: 🔧 Setup Node.js
+      #   uses: actions/setup-node@v4
       #   with:
-      #     php-version: '8.2'          # Change to 8.1 / 8.3 etc. if needed
-      # - name: Install Composer deps
-      #   run: composer install --no-dev --optimize-autoloader --prefer-dist
+      #     node-version: '20'
+      #
+      # - name: 📦 Install dependencies
+      #   run: npm install
+      #
+      # - name: 🛠 Build project
+      #   run: npm run build
+      #
+      # Then change local-dir below to: ./dist/ or ./build/ or wherever your built files end up
 
-      # Optional: Build frontend (if you have package.json)
-      # - name: Install npm dependencies
-      #   run: npm ci
-      # - name: Build project
-      #   run: npm run build             # or yarn build, etc.
-
-      - name: 📂 Sync files to InfinityFree via FTP
+      - name: 🔄 Sync files to InfinityFree via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server:     ${{ secrets.FTP_HOST }}
-          username:   ${{ secrets.FTP_USERNAME }}
-          password:   ${{ secrets.FTP_PASSWORD }}
-          server-dir: /htdocs/                  # Must end with /  ← this is your website root on InfinityFree
-          protocol:   ftp                       # Plain FTP (InfinityFree usually works best with this)
-          port:       21
-          # local-dir: ./dist/                  # ← Uncomment & change ONLY if deploying built files (e.g. from React/Vue build folder)
-          # exclude: |                          # ← Optional: skip these patterns
-          #   **/.git*
-          #   **/node_modules/**
-          #   **/.env
-          #   **/vendor/phpunit/**
-          # dangerous-clean-slate: true         # ← Uncomment ONLY for FIRST deploy to wipe remote folder (DANGEROUS – deletes everything!)
+          server:       ${{ secrets.FTP_SERVER }}       # ← this was missing/wrong name before
+          username:     ${{ secrets.FTP_USERNAME }}
+          password:     ${{ secrets.FTP_PASSWORD }}
+          port:         21                              # default for plain FTP
+          protocol:     ftp                             # use 'ftps' if your host supports explicit FTPS
+          local-dir:    ./                              # ← folder to upload FROM (current repo root)
+                                                        #   change to ./dist/ or ./public/ if you build first
+          server-dir:   /htdocs/                        # ← common InfinityFree remote path
+                                                        #   or /public_html/ — check your control panel
+          exclude:      |
+            **/.git*
+            **/.github/**
+            **/node_modules/**
+            **/.env
+            **/README.md
+            **/*.log
+          log-level:    standard                        # or verbose for more debug info
