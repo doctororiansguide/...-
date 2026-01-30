@@ -1,0 +1,6 @@
+body { font-family: system-ui, -apple-system, sans-serif; }
+.hero { min-height: 60vh; display: flex; align-items: center; }
+.card { transition: transform 0.2s; }
+.card:hover { transform: translateY(-5px); }
+.btn-primary { background-color: #007bff; border: none; }
+.navbar { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
