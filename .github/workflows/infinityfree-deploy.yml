@@ -3,7 +3,7 @@ name: Deploy to InfinityFree
 on:
   push:
     branches:
-      - main  # This triggers the upload whenever you push to the 'main' branch
+      - main
 
 jobs:
   web-deploy:
@@ -20,6 +20,5 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         port: 21
-        # InfinityFree usually requires files to be in the htdocs folder
-        server-dir: ./htdocs/ 
+        server-dir: ./htdocs/
         
